@@ -1,0 +1,36 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+ENV/
+.venv/
+backend/venv/
+Backend/venv/
+*/venv/
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Node & Frontend
+node_modules/
+Frontend/node_modules/
+dist/
+Frontend/dist/
+.oxlintrc.json
+
+# Databases & Vector Stores
+*.db
+*.sqlite
+*.sqlite3
+resume_analyzer.db
+faiss_index/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
