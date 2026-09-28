@@ -15,8 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Pre-download Sentence Transformers model for fast startup
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
 
-# Copy backend application files
-COPY Backend/ ./app/
+# Copy backend application code directly into /app
+COPY Backend/ .
+
+ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
