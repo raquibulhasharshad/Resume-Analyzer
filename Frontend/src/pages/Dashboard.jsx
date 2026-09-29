@@ -12,9 +12,10 @@ export default function Dashboard() {
     async function fetchRecent() {
       try {
         const data = await getHistoryApi();
-        setRecentAnalyses(data.slice(0, 3));
+        setRecentAnalyses(Array.isArray(data) ? data.slice(0, 3) : []);
       } catch (err) {
         console.error("Failed to load recent history:", err);
+        setRecentAnalyses([]);
       } finally {
         setLoading(false);
       }

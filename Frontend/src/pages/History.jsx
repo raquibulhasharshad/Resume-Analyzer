@@ -20,9 +20,10 @@ export default function History() {
     setLoading(true);
     try {
       const data = await getHistoryApi();
-      setHistoryList(data);
+      setHistoryList(Array.isArray(data) ? data : []);
     } catch (err) {
       setToast({ message: 'Failed to load analysis history from server.', type: 'error' });
+      setHistoryList([]);
     } finally {
       setLoading(false);
     }
@@ -53,7 +54,7 @@ export default function History() {
     try {
       await deleteAnalysisApi(itemToDelete.id);
       setToast({ message: 'Analysis record deleted successfully.', type: 'success' });
-      setHistoryList(historyList.filter(item => item.id !== itemToDelete.id));
+      setHistoryList((prev) => (Array.isArray(prev) ? prev.filter(item => item.id !== itemToDelete.id) : []));
       setItemToDelete(null);
     } catch (err) {
       setToast({ message: 'Failed to delete record.', type: 'error' });
@@ -62,10 +63,10 @@ export default function History() {
     }
   };
 
-  const filteredList = historyList.filter(item =>
+  const filteredList = Array.isArray(historyList) ? historyList.filter(item =>
     item.job_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.resume_filename?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
