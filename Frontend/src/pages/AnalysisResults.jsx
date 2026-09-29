@@ -1,10 +1,11 @@
 import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, CheckCircle2, AlertTriangle, FileText, Briefcase, Award, Layers, Printer, RefreshCw, AlertOctagon } from 'lucide-react';
+import { Sparkles, ArrowLeft, CheckCircle2, AlertTriangle, FileText, Briefcase, Award, Layers, Printer, RefreshCw, AlertOctagon, Calendar } from 'lucide-react';
 import CircularProgress from '../components/CircularProgress';
 import SkillsCard from '../components/SkillsCard';
 import InterviewCard from '../components/InterviewCard';
 import ChatAssistant from '../components/ChatAssistant';
+import { formatLocalDateTime } from '../utils/dateFormatter';
 
 export default function AnalysisResults() {
   const location = useLocation();
@@ -127,9 +128,15 @@ export default function AnalysisResults() {
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
                 {data.job_title || 'Generative AI Engineer'}
               </h1>
-              <p className="text-xs text-gray-400 font-mono">
-                Resume File: <span className="text-gray-200">{data.resume_filename}</span>
-              </p>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 font-mono">
+                <span>Resume File: <span className="text-gray-200">{data.resume_filename}</span></span>
+                {data.created_at && (
+                  <span className="flex items-center gap-1 text-gray-400">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    {formatLocalDateTime(data.created_at)}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* AI Summary Highlight Box */}

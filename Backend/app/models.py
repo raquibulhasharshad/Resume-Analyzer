@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Text, JSON, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 class User(Base):
@@ -10,7 +10,7 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     analyses = relationship("Analysis", back_populates="user", cascade="all, delete-orphan")
@@ -40,7 +40,7 @@ class Analysis(Base):
     # List of interview preparation questions
     interview_questions = Column(JSON, nullable=False, default=list)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationship to user
     user = relationship("User", back_populates="analyses")

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { History as HistoryIcon, Trash2, Eye, Calendar, FileText, Search, RefreshCw, FileSearch, AlertTriangle, X } from 'lucide-react';
 import { getHistoryApi, getAnalysisByIdApi, deleteAnalysisApi } from '../services/api';
 import Toast from '../components/Toast';
+import { formatLocalDateTime } from '../utils/dateFormatter';
 
 export default function History() {
   const navigate = useNavigate();
@@ -160,7 +161,7 @@ export default function History() {
                     <td className="py-4 px-6 text-xs text-gray-400 font-mono">
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                        {new Date(item.created_at).toLocaleDateString()} {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatLocalDateTime(item.created_at)}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right">

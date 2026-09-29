@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight, Brain, Cpu, FileSearch, ShieldCheck, Zap, History } from 'lucide-react';
+import { Sparkles, ArrowRight, Brain, Cpu, FileSearch, ShieldCheck, Zap, History, Calendar } from 'lucide-react';
 import { getHistoryApi } from '../services/api';
+import { formatLocalDateTime } from '../utils/dateFormatter';
 
 export default function Dashboard() {
   const [recentAnalyses, setRecentAnalyses] = useState([]);
@@ -151,7 +152,15 @@ export default function Dashboard() {
                 >
                   <div>
                     <h4 className="font-semibold text-white text-sm">{item.job_title}</h4>
-                    <p className="text-xs text-gray-400 font-mono mt-0.5">{item.resume_filename}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-400 font-mono mt-0.5">
+                      <span>{item.resume_filename}</span>
+                      {item.created_at && (
+                        <span className="flex items-center gap-1 text-gray-400">
+                          <Calendar className="w-3 h-3 text-gray-400" />
+                          {formatLocalDateTime(item.created_at)}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center space-x-4">
