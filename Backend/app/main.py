@@ -1,10 +1,12 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
 from app.database import engine, Base
 from app.routes import resume, analysis, history, auth
+from app.services.embedding_service import get_embedding_model
 
 # Configure logging
 logging.basicConfig(
@@ -20,10 +22,22 @@ try:
 except Exception as e:
     logger.error(f"Error initializing database tables: {e}")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Pre-warm SentenceTransformer model on server startup to eliminate cold-start HTTP timeouts
+    try:
+        logger.info("Pre-warming SentenceTransformer embedding model on FastAPI startup...")
+        get_embedding_model()
+        logger.info("Embedding model pre-warmed and ready in server memory.")
+    except Exception as e:
+        logger.warning(f"Embedding model pre-warm exception (will load lazily): {e}")
+    yield
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Production RAG + Vector Search AI Resume Analyzer & Job Matcher API with Auth",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configure CORS

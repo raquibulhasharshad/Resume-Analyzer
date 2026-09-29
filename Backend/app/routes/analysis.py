@@ -8,6 +8,11 @@ from app.services.resume_analyzer import analyze_resume_and_match
 from app.services.llm_service import answer_analysis_chat_question
 from app.utils.auth import get_current_user, get_optional_current_user
 
+from datetime import datetime, timezone, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/analysis", tags=["Analysis"])
 
 @router.post("/analyze", response_model=AnalysisResultResponse)
@@ -19,6 +24,7 @@ def analyze_resume(
     """
     Protected Endpoint: Requires user login.
     Runs full RAG + FAISS + LLM analysis and persists record under current candidate's user ID.
+    Includes automatic deduplication to prevent double report creation on client network retries.
     """
     if not request.resume_text or len(request.resume_text.strip()) < 10:
         raise HTTPException(status_code=400, detail="Resume text is empty or too short for analysis.")
@@ -26,12 +32,32 @@ def analyze_resume(
     if not request.job_description or len(request.job_description.strip()) < 10:
         raise HTTPException(status_code=400, detail="Job description is empty or too short for analysis.")
 
+    # Deduplication check: If an identical analysis was completed for this user in the last 60 seconds,
+    # return the existing record instead of re-running the LLM pipeline and creating duplicate DB records.
+    filename = request.filename or "Uploaded_Resume.pdf"
+    now_utc = datetime.now(timezone.utc)
+    cutoff_time = now_utc - timedelta(seconds=60)
+
+    recent_user_analyses = db.query(Analysis).filter(
+        Analysis.user_id == current_user.id,
+        Analysis.resume_filename == filename
+    ).order_by(Analysis.id.desc()).limit(3).all()
+
+    for prev in recent_user_analyses:
+        if prev.created_at:
+            created_dt = prev.created_at
+            if created_dt.tzinfo is None:
+                created_dt = created_dt.replace(tzinfo=timezone.utc)
+            if created_dt >= cutoff_time:
+                logger.info(f"Deduplicated analysis request for User #{current_user.id}. Returning existing report #{prev.id}.")
+                return prev
+
     try:
         result = analyze_resume_and_match(
             resume_text=request.resume_text,
             job_description=request.job_description,
             db=db,
-            filename=request.filename or "Uploaded_Resume.pdf",
+            filename=filename,
             job_title=request.job_title,
             user_id=current_user.id
         )
